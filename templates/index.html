@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Analisis Sentimen Naive Bayes</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: 30px;
+            color: #0f172a;
+        }
+
+        .header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 35px;
+            text-align: center;
+            background: #f8fafc;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .upload-description {
+            margin-bottom: 20px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #1d4ed8;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 15px 18px;
+            border-radius: 8px;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .result {
+            margin-top: 35px;
+        }
+
+        .result-title {
+            margin: 0 0 20px;
+            font-size: 22px;
+            color: #0f172a;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .summary-box {
+            padding: 22px 15px;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-box h3 {
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-weight: normal;
+            color: #64748b;
+        }
+
+        .summary-box p {
+            margin: 0;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .total p {
+            color: #334155;
+        }
+
+        .positive p {
+            color: #16a34a;
+        }
+
+        .neutral p {
+            color: #ca8a04;
+        }
+
+        .negative p {
+            color: #dc2626;
+        }
+
+        .table-section {
+            margin-top: 35px;
+        }
+
+        .table-title {
+            margin: 0 0 15px;
+            font-size: 20px;
+            color: #0f172a;
+        }
+
+        .table-info {
+            margin-bottom: 15px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        thead {
+            background: #0f172a;
+            color: #ffffff;
+        }
+
+        th {
+            padding: 13px 12px;
+            text-align: left;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            vertical-align: top;
+            line-height: 1.5;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .komen-column {
+            min-width: 350px;
+            max-width: 500px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .profile-column {
+            min-width: 150px;
+        }
+
+        .url-column {
+            min-width: 180px;
+            max-width: 250px;
+            word-break: break-word;
+        }
+
+        .sentimen {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .sentimen-positif {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .sentimen-netral {
+            background: #fef9c3;
+            color: #a16207;
+        }
+
+        .sentimen-negatif {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .probability {
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .download {
+            display: block;
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            border-radius: 8px;
+            background: #16a34a;
+            color: #ffffff;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .download:hover {
+            background: #15803d;
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 10px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info strong {
+            color: #1e3a8a;
+        }
+
+        @media (max-width: 700px) {
+
+            .container {
+                width: 94%;
+                margin: 25px auto;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 450px) {
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="card">
+
+            <div class="header">
+
+                <h1>
+                    Analisis Sentimen
+                </h1>
+
+                <p>
+                    Analisis komentar menggunakan
+                    algoritma Naive Bayes
+                </p>
+
+            </div>
+
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <div class="upload-box">
+
+                    <div class="upload-title">
+                        Upload File Hasil Scraping
+                    </div>
+
+                    <div class="upload-description">
+
+                        Pilih file Excel hasil scraping
+                        dengan format <strong>.xlsx</strong>.
+
+                        <br>
+
+                        File harus memiliki kolom
+                        <strong>komen</strong>.
+
+                    </div>
+
+                    <input
+                        type="file"
+                        name="file"
+                        class="file-input"
+                        accept=".xlsx"
+                        required
+                    >
+
+                    <button
+                        type="submit"
+                        class="button"
+                    >
+                        Analisis Sentimen
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            {% if error %}
+
+                <div class="error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+
+            {% if result %}
+
+                <div class="result">
+
+                    <h2 class="result-title">
+                        Hasil Analisis Sentimen
+                    </h2>
+
+
+                    <div class="summary">
+
+                        <div class="summary-box total">
+
+                            <h3>
+                                Total Data
+                            </h3>
+
+                            <p>
+                                {{ result.total }}
+                            </p>
+
+                        </div>
+
+
+                        <div class="summary-box positive">
+
+                            <h3>
+                                Positif
+                            </h3>
+
+                            <p>
+                                {{ result.positif }}
+                            </p>
+
+                        </div>
+
+
+                        <div class="summary-box neutral">
+
+                            <h3>
+                                Netral
+                            </h3>
+
+                            <p>
+                                {{ result.netral }}
+                            </p>
+
+                        </div>
+
+
+                        <div class="summary-box negative">
+
+                            <h3>
+                                Negatif
+                            </h3>
+
+                            <p>
+                                {{ result.negatif }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-section">
+
+                        <h2 class="table-title">
+                            Detail Hasil Klasifikasi
+                        </h2>
+
+                        <div class="table-info">
+
+                            Menampilkan
+                            <strong>{{ result.total }}</strong>
+                            data yang berhasil dibaca dan
+                            diklasifikasikan oleh model.
+
+                        </div>
+
+
+                        <div class="table-wrapper">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>No</th>
+
+                                        <th>
+                                            Komentar
+                                        </th>
+
+                                        <th>
+                                            Tanggal
+                                        </th>
+
+                                        <th>
+                                            Profile
+                                        </th>
+
+                                        <th>
+                                            Facebook URL
+                                        </th>
+
+                                        <th>
+                                            Sentimen
+                                        </th>
+
+                                        <th>
+                                            Prob. Positif
+                                        </th>
+
+                                        <th>
+                                            Prob. Netral
+                                        </th>
+
+                                        <th>
+                                            Prob. Negatif
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    {% for row in result.data %}
+
+                                        <tr>
+
+                                            <td>
+                                                {{ loop.index }}
+                                            </td>
+
+                                            <td class="komen-column">
+                                                {{ row.get("komen", "") }}
+                                            </td>
+
+                                            <td>
+                                                {{ row.get("date", "") }}
+                                            </td>
+
+                                            <td class="profile-column">
+                                                {{ row.get("profileName", "") }}
+                                            </td>
+
+                                            <td class="url-column">
+
+                                                {% if row.get("facebookUrl") %}
+
+                                                    <a
+                                                        href="{{ row.get('facebookUrl') }}"
+                                                        target="_blank"
+                                                    >
+                                                        {{ row.get("facebookUrl") }}
+                                                    </a>
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                {% if row.get("sentimen") == "Positif" %}
+
+                                                    <span class="sentimen sentimen-positif">
+                                                        Positif
+                                                    </span>
+
+                                                {% elif row.get("sentimen") == "Netral" %}
+
+                                                    <span class="sentimen sentimen-netral">
+                                                        Netral
+                                                    </span>
+
+                                                {% elif row.get("sentimen") == "Negatif" %}
+
+                                                    <span class="sentimen sentimen-negatif">
+                                                        Negatif
+                                                    </span>
+
+                                                {% else %}
+
+                                                    {{ row.get("sentimen", "") }}
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td class="probability">
+
+                                                {% if row.get("probabilitas_positif") != "" %}
+
+                                                    {{ row.get("probabilitas_positif") }}%
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td class="probability">
+
+                                                {% if row.get("probabilitas_netral") != "" %}
+
+                                                    {{ row.get("probabilitas_netral") }}%
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td class="probability">
+
+                                                {% if row.get("probabilitas_negatif") != "" %}
+
+                                                    {{ row.get("probabilitas_negatif") }}%
+
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="/download"
+                        class="download"
+                    >
+                        Download Hasil Analisis Excel
+                    </a>
+
+
+                    <div class="info">
+
+                        <strong>Informasi:</strong>
+
+                        Hasil analisis mempertahankan
+                        data asli dari file scraping,
+                        termasuk kolom
+                        <strong>komen</strong>,
+                        <strong>date</strong>,
+                        <strong>profileName</strong>,
+                        dan
+                        <strong>facebookUrl</strong>.
+
+                        <br><br>
+
+                        Sistem menambahkan kolom
+                        <strong>sentimen</strong>
+                        serta probabilitas untuk setiap
+                        kelas sentimen.
+
+                        <br><br>
+
+                        Tabel di atas menampilkan seluruh
+                        data yang berhasil dibaca oleh sistem
+                        dan hasil klasifikasi yang diberikan
+                        oleh model Naive Bayes.
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

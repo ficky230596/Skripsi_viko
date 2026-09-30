@@ -1,0 +1,39 @@
+streamlit run app.py
+
+
+Langkah-langkah Push ke GitHub:
+Buat file .gitignore terlebih dahulu (agar folder seperti venv/, uploads/, dan file hasil Excel tidak ikut ter-upload):
+Buka terminal di folder proyek Anda dan jalankan perintah ini untuk membuat file .gitignore:
+
+Bash
+echo "__pycache__/" >> .gitignore
+echo "venv/" >> .gitignore
+echo "uploads/" >> .gitignore
+echo "hasil_*.xlsx" >> .gitignore
+echo ".vscode/" >> .gitignore
+Inisialisasi Git (jika belum pernah diinisialisasi):
+
+Bash
+git init
+Tambahkan file ke staging area:
+
+Bash
+git add .
+Lakukan commit pertama:
+
+Bash
+git commit -m "Commit pertama kode skripsi analisis sentimen"
+Hubungkan repository lokal ke GitHub:
+
+Bash
+git remote add origin https://github.com/ficky230596/Skripsi_viko.git
+(Jika sebelumnya sudah pernah diset dan error remote origin already exists, Anda bisa memperbaruinya menggunakan perintah: git remote set-url origin [https://github.com/ficky230596/Skripsi_viko.git](https://github.com/ficky230596/Skripsi_viko.git))
+
+Ubah branch utama menjadi main (standar GitHub saat ini):
+
+Bash
+git branch -M main
+Push kode ke GitHub:
+
+Bash
+git push -u origin main

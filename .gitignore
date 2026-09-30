@@ -1,0 +1,13 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+
+# Folder Upload & Hasil Output
+uploads/
+hasil_*.xlsx
+
+# Konfigurasi Editor
+.vscode/
